@@ -7,6 +7,52 @@ Konsep sistem keanggotaan (membership) dengan fitur:
 - **Matrix Structure** – struktur matrix (biasanya 2x2, 3x3, atau custom) untuk penempatan member
 - **Bonus yang Bisa Di-setting** – admin bisa mengatur jenis bonus, persentase, level, dan kondisi
 
+---
+
+## 🌐 Web Demo (Live)
+
+Ada **versi web interaktif** yang sudah siap dicoba:
+
+📁 Folder: [`web/`](./web/)
+
+### Cara menjalankan lokal
+
+```bash
+# Clone repo
+git clone https://github.com/KingRafer/login-referral-matrix-bonus.git
+cd login-referral-matrix-bonus/web
+
+# Buka langsung di browser (atau pakai live server)
+# Contoh dengan Python:
+python -m http.server 8080
+# Lalu buka http://localhost:8080
+```
+
+Atau buka file `web/index.html` langsung di browser.
+
+### Akun Demo
+
+| Role  | Email            | Password  |
+|-------|------------------|-----------|
+| Admin | admin@demo.com   | admin123  |
+| Member| budi@mail.com    | 123456    |
+
+### Fitur Web Demo
+
+| Halaman            | Fitur                                      |
+|--------------------|--------------------------------------------|
+| **Login / Register** | Auth + support kode referral              |
+| **Dashboard**      | Statistik downline, bonus, rank, aktivitas |
+| **Referral**       | Link referral + daftar downline multi-level|
+| **Matrix**         | Visualisasi tree 2×2 / 3×3 + spillover     |
+| **Bonus Saya**     | Riwayat bonus per tipe                     |
+| **Setting Bonus**  | CRUD bonus (nama, tipe, %, level, aktif)   |
+| **Members**        | Daftar semua member                        |
+
+Data disimpan di **localStorage** browser, jadi tetap ada meski refresh.
+
+---
+
 ## Fitur Utama (Konsep)
 
 ### 1. Authentication
@@ -33,26 +79,15 @@ Admin dapat mengatur:
 - Syarat (minimal downline, volume, rank, dll)
 - Status aktif/nonaktif
 
-## Struktur Folder (Saran)
+## Struktur Folder
 
 ```
 login-referral-matrix-bonus/
-├── backend/                 # API (Node.js / Laravel / NestJS / etc)
-│   ├── src/
-│   │   ├── auth/
-│   │   ├── users/
-│   │   ├── referral/
-│   │   ├── matrix/
-│   │   ├── bonus/
-│   │   └── settings/
-│   └── ...
-├── frontend/                # Dashboard (React / Vue / Next.js)
-│   ├── src/
-│   │   ├── pages/
-│   │   ├── components/
-│   │   └── ...
-├── docs/                    # Dokumentasi konsep & flowchart
-├── database/                # Migration / schema example
+├── web/                     # ← Demo web interaktif (HTML + JS)
+│   ├── index.html
+│   └── js/app.js
+├── docs/                    # Dokumentasi konsep
+│   └── CONCEPT.md
 └── README.md
 ```
 
@@ -73,14 +108,7 @@ login-referral-matrix-bonus/
 **referrals**
 - id, user_id, referred_user_id, level, created_at
 
-## Cara Pakai Repo Ini
-
-1. Clone repo
-2. Pilih tech stack (bisa Laravel + Vue, NestJS + React, dll)
-3. Implementasikan sesuai konsep di atas
-4. Sesuaikan bonus settings lewat admin panel
-
-## Tech Stack Suggestion
+## Tech Stack Suggestion (untuk production)
 
 | Layer       | Pilihan                          |
 |-------------|----------------------------------|
@@ -89,10 +117,6 @@ login-referral-matrix-bonus/
 | Database    | PostgreSQL / MySQL               |
 | Auth        | JWT + Refresh Token              |
 | Realtime    | Socket.io (opsional untuk notif) |
-
-## Status
-
-Ini adalah **starter concept repo**. Belum ada implementasi kode. Silakan develop sesuai kebutuhan.
 
 ---
 
