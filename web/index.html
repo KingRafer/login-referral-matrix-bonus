@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Referral Matrix System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: { 50:'#eef2ff',100:'#e0e7ff',200:'#c7d2fe',300:'#a5b4fc',400:'#818cf8',500:'#6366f1',600:'#4f46e5',700:'#4338ca',800:'#3730a3',900:'#312e81' },
+            dark: { 800:'#1e1e2d',900:'#151521' }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+    body { font-family: 'Inter', system-ui, sans-serif; }
+    .matrix-node { transition: all 0.2s; }
+    .matrix-node:hover { transform: scale(1.05); }
+    .fade-in { animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+    .sidebar-link.active { background: rgba(99,102,241,0.15); color: #818cf8; border-right: 3px solid #6366f1; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-thumb { background: #4f46e5; border-radius: 3px; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+
+  <!-- AUTH SCREEN -->
+  <div id="auth-screen" class="min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary-600/20 mb-4">
+          <i class="fas fa-network-wired text-3xl text-primary-400"></i>
+        </div>
+        <h1 class="text-2xl font-bold tracking-tight">Referral Matrix</h1>
+        <p class="text-slate-400 text-sm mt-1">Login · Referral · Matrix · Bonus</p>
+      </div>
+
+      <div class="flex bg-slate-900 rounded-xl p-1 mb-6">
+        <button onclick="switchAuthTab('login')" id="tab-login" class="flex-1 py-2.5 rounded-lg text-sm font-medium bg-primary-600 text-white transition">Login</button>
+        <button onclick="switchAuthTab('register')" id="tab-register" class="flex-1 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white transition">Register</button>
+      </div>
+
+      <div id="form-login" class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4 fade-in">
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1.5">Email / Username</label>
+          <input id="login-email" type="text" value="admin@demo.com" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="email@example.com" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1.5">Password</label>
+          <input id="login-password" type="password" value="admin123" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="••••••••" />
+        </div>
+        <button onclick="doLogin()" class="w-full bg-primary-600 hover:bg-primary-500 text-white font-medium py-3 rounded-xl transition flex items-center justify-center gap-2">
+          <i class="fas fa-sign-in-alt"></i> Masuk
+        </button>
+        <p class="text-center text-xs text-slate-500 mt-3">Demo: <span class="text-primary-400">admin@demo.com</span> / <span class="text-primary-400">admin123</span></p>
+      </div>
+
+      <div id="form-register" class="hidden bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4 fade-in">
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1.5">Nama Lengkap</label>
+          <input id="reg-name" type="text" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="John Doe" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1.5">Email</label>
+          <input id="reg-email" type="email" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="email@example.com" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1.5">Password</label>
+          <input id="reg-password" type="password" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="••••••••" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1.5">Kode Referral <span class="text-slate-500">(opsional)</span></label>
+          <input id="reg-referral" type="text" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 uppercase" placeholder="ADMIN01" />
+        </div>
+        <button onclick="doRegister()" class="w-full bg-primary-600 hover:bg-primary-500 text-white font-medium py-3 rounded-xl transition flex items-center justify-center gap-2">
+          <i class="fas fa-user-plus"></i> Daftar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- APP SHELL -->
+  <div id="app-shell" class="hidden min-h-screen flex">
+    <aside class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col fixed h-full z-20">
+      <div class="p-5 border-b border-slate-800">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-primary-600/20 flex items-center justify-center">
+            <i class="fas fa-network-wired text-primary-400"></i>
+          </div>
+          <div>
+            <div class="font-semibold text-sm">Referral Matrix</div>
+            <div class="text-xs text-slate-500">v1.0 Demo</div>
+          </div>
+        </div>
+      </div>
+
+      <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
+        <a href="#" onclick="showPage('dashboard')" class="sidebar-link active flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition" data-page="dashboard">
+          <i class="fas fa-home w-5 text-center"></i> Dashboard
+        </a>
+        <a href="#" onclick="showPage('referral')" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition" data-page="referral">
+          <i class="fas fa-share-nodes w-5 text-center"></i> Referral
+        </a>
+        <a href="#" onclick="showPage('matrix')" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition" data-page="matrix">
+          <i class="fas fa-sitemap w-5 text-center"></i> Matrix
+        </a>
+        <a href="#" onclick="showPage('bonus')" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition" data-page="bonus">
+          <i class="fas fa-coins w-5 text-center"></i> Bonus Saya
+        </a>
+        <div class="pt-4 pb-2 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Admin</div>
+        <a href="#" onclick="showPage('settings')" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition" data-page="settings">
+          <i class="fas fa-sliders w-5 text-center"></i> Setting Bonus
+        </a>
+        <a href="#" onclick="showPage('members')" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition" data-page="members">
+          <i class="fas fa-users w-5 text-center"></i> Members
+        </a>
+      </nav>
+
+      <div class="p-4 border-t border-slate-800">
+        <div class="flex items-center gap-3 mb-3">
+          <div id="user-avatar" class="w-9 h-9 rounded-full bg-primary-600 flex items-center justify-center text-sm font-bold">A</div>
+          <div class="flex-1 min-w-0">
+            <div id="user-name" class="text-sm font-medium truncate">Admin Demo</div>
+            <div id="user-role" class="text-xs text-slate-500">Admin</div>
+          </div>
+        </div>
+        <button onclick="doLogout()" class="w-full text-xs text-slate-400 hover:text-red-400 py-2 rounded-lg hover:bg-slate-800 transition flex items-center justify-center gap-2">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+      </div>
+    </aside>
+
+    <main class="flex-1 ml-64 min-h-screen">
+      <header class="sticky top-0 z-10 bg-slate-950/80 backdrop-blur border-b border-slate-800 px-6 py-4 flex items-center justify-between">
+        <h2 id="page-title" class="text-lg font-semibold">Dashboard</h2>
+        <div class="flex items-center gap-3">
+          <div class="text-xs bg-slate-800 px-3 py-1.5 rounded-full text-slate-400">
+            Kode Referral: <span id="my-ref-code" class="text-primary-400 font-mono font-medium">ADMIN01</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="p-6">
+        <!-- DASHBOARD -->
+        <div id="page-dashboard" class="page fade-in">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs text-slate-400">Total Downline</span>
+                <i class="fas fa-users text-primary-400"></i>
+              </div>
+              <div class="text-2xl font-bold" id="stat-downline">12</div>
+              <div class="text-xs text-emerald-400 mt-1">+3 bulan ini</div>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs text-slate-400">Bonus Bulan Ini</span>
+                <i class="fas fa-coins text-amber-400"></i>
+              </div>
+              <div class="text-2xl font-bold" id="stat-bonus">Rp 2.450.000</div>
+              <div class="text-xs text-emerald-400 mt-1">+18% dari bulan lalu</div>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs text-slate-400">Posisi Matrix</span>
+                <i class="fas fa-sitemap text-cyan-400"></i>
+              </div>
+              <div class="text-2xl font-bold" id="stat-matrix">Level 2</div>
+              <div class="text-xs text-slate-400 mt-1">2x2 Matrix</div>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs text-slate-400">Rank</span>
+                <i class="fas fa-trophy text-yellow-400"></i>
+              </div>
+              <div class="text-2xl font-bold" id="stat-rank">Gold</div>
+              <div class="text-xs text-slate-400 mt-1">Target: Platinum</div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+              <h3 class="font-semibold mb-4 flex items-center gap-2"><i class="fas fa-history text-slate-400"></i> Aktivitas Terbaru</h3>
+              <div id="activity-list" class="space-y-3 text-sm"></div>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+              <h3 class="font-semibold mb-4 flex items-center gap-2"><i class="fas fa-chart-line text-slate-400"></i> Ringkasan Bonus</h3>
+              <div id="bonus-summary" class="space-y-3"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- REFERRAL -->
+        <div id="page-referral" class="page hidden fade-in">
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 mb-6">
+            <h3 class="font-semibold mb-2">Link Referral Anda</h3>
+            <p class="text-sm text-slate-400 mb-4">Bagikan link ini untuk mengajak member baru.</p>
+            <div class="flex gap-2">
+              <input id="ref-link" readonly class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm font-mono text-primary-300" value="" />
+              <button onclick="copyRefLink()" class="bg-primary-600 hover:bg-primary-500 px-5 rounded-xl text-sm font-medium transition">
+                <i class="fas fa-copy"></i> Copy
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+            <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
+              <h3 class="font-semibold">Daftar Downline</h3>
+              <span class="text-xs text-slate-500" id="downline-count">0 member</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead class="bg-slate-800/50 text-slate-400 text-xs uppercase">
+                  <tr>
+                    <th class="px-5 py-3 text-left">Member</th>
+                    <th class="px-5 py-3 text-left">Level</th>
+                    <th class="px-5 py-3 text-left">Join Date</th>
+                    <th class="px-5 py-3 text-left">Status</th>
+                    <th class="px-5 py-3 text-right">Bonus dari dia</th>
+                  </tr>
+                </thead>
+                <tbody id="downline-table" class="divide-y divide-slate-800"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- MATRIX -->
+        <div id="page-matrix" class="page hidden fade-in">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h3 class="font-semibold">Visualisasi Matrix 2×2</h3>
+              <p class="text-sm text-slate-400 mt-1">Setiap posisi menampung 2 anak. Spillover otomatis ke bawah.</p>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="changeMatrixSize(2)" class="matrix-size-btn px-3 py-1.5 rounded-lg text-xs bg-primary-600 text-white" data-size="2">2×2</button>
+              <button onclick="changeMatrixSize(3)" class="matrix-size-btn px-3 py-1.5 rounded-lg text-xs bg-slate-800 text-slate-300 hover:bg-slate-700" data-size="3">3×3</button>
+            </div>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 overflow-x-auto">
+            <div id="matrix-tree" class="flex flex-col items-center min-w-max"></div>
+          </div>
+
+          <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center">
+              <div class="text-2xl font-bold text-primary-400" id="matrix-filled">0</div>
+              <div class="text-xs text-slate-400 mt-1">Posisi Terisi</div>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center">
+              <div class="text-2xl font-bold text-amber-400" id="matrix-empty">0</div>
+              <div class="text-xs text-slate-400 mt-1">Posisi Kosong</div>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center">
+              <div class="text-2xl font-bold text-emerald-400" id="matrix-cycles">0</div>
+              <div class="text-xs text-slate-400 mt-1">Cycle Selesai</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BONUS SAYA -->
+        <div id="page-bonus" class="page hidden fade-in">
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+            <div class="px-5 py-4 border-b border-slate-800">
+              <h3 class="font-semibold">Riwayat Bonus</h3>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead class="bg-slate-800/50 text-slate-400 text-xs uppercase">
+                  <tr>
+                    <th class="px-5 py-3 text-left">Tanggal</th>
+                    <th class="px-5 py-3 text-left">Tipe</th>
+                    <th class="px-5 py-3 text-left">Dari</th>
+                    <th class="px-5 py-3 text-left">Keterangan</th>
+                    <th class="px-5 py-3 text-right">Jumlah</th>
+                  </tr>
+                </thead>
+                <tbody id="bonus-table" class="divide-y divide-slate-800"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- SETTING BONUS -->
+        <div id="page-settings" class="page hidden fade-in">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h3 class="font-semibold">Pengaturan Bonus</h3>
+              <p class="text-sm text-slate-400 mt-1">Atur jenis, persentase, level, dan status bonus.</p>
+            </div>
+            <button onclick="openBonusModal()" class="bg-primary-600 hover:bg-primary-500 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition flex items-center gap-2">
+              <i class="fas fa-plus"></i> Tambah Bonus
+            </button>
+          </div>
+          <div id="bonus-settings-list" class="space-y-3"></div>
+        </div>
+
+        <!-- MEMBERS -->
+        <div id="page-members" class="page hidden fade-in">
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+            <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
+              <h3 class="font-semibold">Semua Member</h3>
+              <span class="text-xs text-slate-500" id="member-count">0 member</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead class="bg-slate-800/50 text-slate-400 text-xs uppercase">
+                  <tr>
+                    <th class="px-5 py-3 text-left">Member</th>
+                    <th class="px-5 py-3 text-left">Referral Code</th>
+                    <th class="px-5 py-3 text-left">Sponsor</th>
+                    <th class="px-5 py-3 text-left">Rank</th>
+                    <th class="px-5 py-3 text-left">Join</th>
+                    <th class="px-5 py-3 text-left">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="members-table" class="divide-y divide-slate-800"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal -->
+  <div id="bonus-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md p-6 fade-in">
+      <h3 class="font-semibold text-lg mb-4" id="modal-title">Tambah Bonus Setting</h3>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Nama Bonus</label>
+          <input id="bs-name" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Direct Referral" />
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Tipe</label>
+          <select id="bs-type" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
+            <option value="referral">Referral Bonus</option>
+            <option value="matrix">Matrix Bonus</option>
+            <option value="matching">Matching Bonus</option>
+            <option value="rank">Rank Bonus</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Persentase (%)</label>
+            <input id="bs-percent" type="number" min="0" max="100" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="10" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Level Max</label>
+            <input id="bs-level" type="number" min="1" max="20" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="1" />
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="checkbox" id="bs-active" checked class="w-4 h-4 rounded accent-primary-500" />
+          <label for="bs-active" class="text-sm text-slate-300">Aktif</label>
+        </div>
+      </div>
+      <div class="flex gap-3 mt-6">
+        <button onclick="closeBonusModal()" class="flex-1 py-2.5 rounded-xl bg-slate-800 text-sm hover:bg-slate-700 transition">Batal</button>
+        <button onclick="saveBonusSetting()" class="flex-1 py-2.5 rounded-xl bg-primary-600 text-sm font-medium hover:bg-primary-500 transition">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="fixed bottom-6 right-6 z-50 hidden bg-slate-800 border border-slate-700 text-sm px-4 py-3 rounded-xl shadow-xl flex items-center gap-2"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
